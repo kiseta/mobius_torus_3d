@@ -3,20 +3,20 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Möbius Torus in 3D – Interactive Model of the Mobius Torus Geometric Pattern</title>
-<meta name="description" content="Interactive 3D model of the Mobius torus geometric pattern. The flat drawing is rebuilt as a complete 3D surface, including the back and the path of each band.">
+<title>Möbius Torus in 3D – Interactive Mobius Torus Geometric Model</title>
+<meta name="description" content="The Mobius torus geometric model in interactive 3D. The flat drawing is rebuilt as a complete 3D surface.">
 <meta name="keywords" content="mobius torus, möbius torus, moebius torus, mobius torus pattern, mobius torus stained glass, mobius torus drawing, mobius torus 3D, mobius donut, twisted donut, geometric stained glass pattern, stained glass torus, twisted torus, faceted torus, polyhedral torus, octagonal torus, torus drawing, 3D torus viewer, flat drawing to 3D, 2D to 3D, geometric drawing, rhombus torus, crescent bands, spiral torus, helical bands, sectioned donut, donut geometry, toroidal polyhedron, torus knot, impossible shape, optical illusion, op art, sacred geometry, geometric art, math art, mathematical art, line art, coloring page, colouring page, geometry coloring, interactive geometry, topology, SVG, JavaScript">
 <meta name="robots" content="index, follow">
 <meta name="theme-color" content="#4b83c4">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Möbius Torus in 3D – interactive model">
 <meta property="og:image" content="preview.png">
-<meta property="og:image:alt" content="Mobius torus geometric pattern shown as a 3D model with 8 coloured crescent bands">
-<meta property="og:description" content="Interactive 3D model of the Mobius torus geometric pattern. The flat drawing is rebuilt as a complete 3D surface, including the back and the path of each band.">
+<meta property="og:image:alt" content="Mobius torus geometric model shown in 3D with 8 coloured crescent bands">
+<meta property="og:description" content="The Mobius torus geometric model in interactive 3D. The flat drawing is rebuilt as a complete 3D surface.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="preview.png">
 <meta name="twitter:title" content="Möbius Torus in 3D">
-<meta name="twitter:description" content="Interactive 3D model of the Mobius torus geometric pattern. The flat drawing is rebuilt as a complete 3D surface, including the back and the path of each band.">
+<meta name="twitter:description" content="The Mobius torus geometric model in interactive 3D. The flat drawing is rebuilt as a complete 3D surface.">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -27,7 +27,7 @@
   "applicationCategory": "EducationalApplication",
   "operatingSystem": "Any (web browser)",
   "isAccessibleForFree": true,
-  "description": "Interactive 3D model of the Mobius torus geometric pattern. The flat drawing is rebuilt as a complete 3D surface, including the back and the path of each band.",
+  "description": "The Mobius torus geometric model in interactive 3D. The flat drawing is rebuilt as a complete 3D surface.",
   "keywords": "mobius torus, möbius torus, mobius torus stained glass pattern, twisted torus, faceted torus, octagonal torus, flat drawing to 3D, geometric art, sacred geometry, coloring page, rhombus torus, crescent bands"
 }
 </script>
@@ -41,7 +41,6 @@
   .status{font-size:12px;color:#555;margin:0 0 10px}
   details.about{margin:14px 0 4px;font-size:13px;line-height:1.45}
   details.about summary{cursor:pointer;font-weight:bold}
-  details.about h2{font-size:14px;margin:12px 0 4px}
   p{font-size:13px;line-height:1.4}
   label{display:block;font-size:13px;margin:12px 0 5px}
   .value{font-size:12px;color:#555;margin:4px 0 8px}
@@ -66,8 +65,8 @@
   <h1>Möbius Torus in 3D</h1>
   <div class="status" id="status">8 closed bands · 4 colours</div>
   <p>
-    An interactive 3D model of the <b>Mobius torus</b> geometric pattern. The flat drawing is
-    rebuilt as a complete 3D surface, including the back and the path of each band.
+    The <b>Mobius torus</b> geometric model in interactive 3D. The flat drawing is
+    rebuilt as a complete 3D surface.
   </p>
 
   <label for="band">Highlight band</label>
@@ -116,32 +115,14 @@
 
   <div class="legend" id="legend"></div>
 
+
+
   <details class="about">
     <summary>About this model</summary>
-    <h2>What it is</h2>
-    <img src="preview.png" alt="Mobius torus geometric pattern rendered as a 3D model, front view, 8 coloured crescent bands" width="260" style="max-width:100%;height:auto;display:block;margin:8px 0">
-    <p>The <b>Mobius torus</b> (also spelled Möbius or Moebius torus, also called a twisted torus) is a
-    geometric line drawing: a donut shape with an octagonal opening, covered in rhombus-shaped facets that
-    spiral from the inner opening to the outer rim. It is used as a stained glass pattern, a
-    colouring page and geometric line art. This page turns that flat 2D pattern into an interactive
-    3D model.</p>
-    <h2>Purpose</h2>
-    <p>To visualise a flat drawing in 3D: to see what the hidden back looks like, and to follow
-    each twisted band as it climbs the front, crosses the rim, travels around the back and comes
-    back through the opening.</p>
-    <h2>What it shows</h2>
-    <p>The front view matches the flat drawing line for line. Each of the 8 crescent bands starts on one
-    side of the octagonal opening and climbs 7 sections to the rim. The back follows the same geometry
-    as the front, so each band makes one full turn around the hole and closes on itself:
-    8 separate bands, coloured here with 4 colours.</p>
-    <p>About the name: despite being called a Mobius torus, the surface is not a Möbius strip. A torus
-    always has an inside and an outside; it is the bands on it that are twisted.</p>
-    <p>The facets that look like rhombs are rectangles seen at an angle. Each corner of the octagonal
-    opening is a short vertical edge on the inner wall, seen end-on, which is why the
-    octagon's sides tilt in depth.</p>
-    <h2>How to use</h2>
-    <p>Drag to rotate, scroll to zoom. Highlight one band to see its centerline (dashed where it
-    passes behind). Choose a colour preset or pick your own colours to try colouring ideas.</p>
+    <img src="preview.png" alt="Mobius torus geometric model in 3D" width="260" style="max-width:100%;height:auto;display:block;margin:8px 0">
+    <p>The Mobius torus (Möbius torus, Moebius torus) flat drawing, shown as a 3D model.</p>
+    <p>Also known as a twisted torus. The flat drawing is used for stained glass patterns and colouring pages.</p>
+    <p>Octagonal opening, 8 crescent bands, rhombus-shaped facets.</p>
   </details>
 </aside>
 
