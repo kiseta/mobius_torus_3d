@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Möbius Torus in 3D – Interactive Model of the Mobius Torus Geometric Pattern</title>
+<meta name="description" content="Interactive 3D model of the Mobius torus geometric pattern. The flat drawing is rebuilt as a complete 3D surface, including the back and the path of each band.">
+<meta name="keywords" content="mobius torus, möbius torus, moebius torus, mobius torus pattern, mobius torus stained glass, mobius torus drawing, mobius torus 3D, mobius donut, twisted donut, geometric stained glass pattern, stained glass torus, twisted torus, faceted torus, polyhedral torus, octagonal torus, torus drawing, 3D torus viewer, flat drawing to 3D, 2D to 3D, geometric drawing, rhombus torus, crescent bands, spiral torus, helical bands, sectioned donut, donut geometry, toroidal polyhedron, torus knot, impossible shape, optical illusion, op art, sacred geometry, geometric art, math art, mathematical art, line art, coloring page, colouring page, geometry coloring, interactive geometry, topology, SVG, JavaScript">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#4b83c4">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Möbius Torus in 3D – interactive model">
+<meta property="og:image" content="preview.png">
+<meta property="og:image:alt" content="Mobius torus geometric pattern shown as a 3D model with 8 coloured crescent bands">
+<meta property="og:description" content="Interactive 3D model of the Mobius torus geometric pattern. The flat drawing is rebuilt as a complete 3D surface, including the back and the path of each band.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="preview.png">
+<meta name="twitter:title" content="Möbius Torus in 3D">
+<meta name="twitter:description" content="Interactive 3D model of the Mobius torus geometric pattern. The flat drawing is rebuilt as a complete 3D surface, including the back and the path of each band.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Möbius Torus in 3D",
+  "alternateName": ["Mobius torus 3D model", "Twisted torus 3D viewer"],
+  "image": "preview.png",
+  "applicationCategory": "EducationalApplication",
+  "operatingSystem": "Any (web browser)",
+  "isAccessibleForFree": true,
+  "description": "Interactive 3D model of the Mobius torus geometric pattern. The flat drawing is rebuilt as a complete 3D surface, including the back and the path of each band.",
+  "keywords": "mobius torus, möbius torus, mobius torus stained glass pattern, twisted torus, faceted torus, octagonal torus, flat drawing to 3D, geometric art, sacred geometry, coloring page, rhombus torus, crescent bands"
+}
+</script>
+<style>
+  :root{--bg:#f7f7f5;--panel:#fff;--ink:#222}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--ink)}
+  .wrap{display:grid;grid-template-columns:310px 1fr;height:100vh}
+  aside{padding:18px;background:var(--panel);border-right:1px solid #ddd;overflow-y:auto}
+  h1{font-size:18px;margin:0 0 6px}
+  .status{font-size:12px;color:#555;margin:0 0 10px}
+  details.about{margin:14px 0 4px;font-size:13px;line-height:1.45}
+  details.about summary{cursor:pointer;font-weight:bold}
+  details.about h2{font-size:14px;margin:12px 0 4px}
+  p{font-size:13px;line-height:1.4}
+  label{display:block;font-size:13px;margin:12px 0 5px}
+  .value{font-size:12px;color:#555;margin:4px 0 8px}
+  select,input[type=range]{width:100%}
+  .checks label{display:flex;gap:8px;align-items:center;margin:10px 0}
+  button{width:100%;padding:8px;margin-top:10px;background:#fff;border:1px solid #aaa;border-radius:5px;cursor:pointer}
+  .legend{margin-top:10px;font-size:12px;display:grid;gap:6px}
+  .legend label{display:flex;align-items:center;gap:8px;margin:0;font-size:12px}
+  .legend input[type=color]{width:34px;height:24px;padding:0;border:1px solid #999;border-radius:4px;background:none;cursor:pointer}
+  .sw{display:inline-block;width:13px;height:13px;border:1px solid #777;margin-right:6px;vertical-align:-2px}
+  main{position:relative;overflow:hidden;height:100vh}
+  svg{width:100%;height:100vh;display:block;cursor:grab;user-select:none;touch-action:none}
+  svg:active{cursor:grabbing}
+  noscript{display:block;padding:20px}
+  .hint{position:absolute;right:14px;bottom:12px;font-size:12px;background:#ffffffdd;padding:7px 9px;border:1px solid #ddd;border-radius:6px}
+  @media(max-width:800px){.wrap{grid-template-columns:1fr;height:auto}aside{overflow:visible}main{height:70vh}aside{border-right:0;border-bottom:1px solid #ddd}svg{height:70vh}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<aside>
+  <h1>Möbius Torus in 3D</h1>
+  <div class="status" id="status">8 closed bands · 4 colours</div>
+  <p>
+    An interactive 3D model of the <b>Mobius torus</b> geometric pattern. The flat drawing is
+    rebuilt as a complete 3D surface, including the back and the path of each band.
+  </p>
+
+  <label for="band">Highlight band</label>
+  <select id="band">
+    <option value="-1">All 8 bands</option>
+    <option value="0">Band 1 – Pale blue</option>
+    <option value="1">Band 2 – Blue</option>
+    <option value="2">Band 3 – Teal</option>
+    <option value="3">Band 4 – Aqua green</option>
+    <option value="4">Band 5 – Pale blue</option>
+    <option value="5">Band 6 – Blue</option>
+    <option value="6">Band 7 – Teal</option>
+    <option value="7">Band 8 – Aqua green</option>
+  </select>
+
+  <label for="opacity">Face opacity</label>
+  <input id="opacity" type="range" min="0" max="1" step="0.01" value="0.65">
+  <div id="opacityValue" class="value">65%</div>
+
+  <label for="roll">Horizontal rotation</label>
+  <input id="roll" type="range" min="-45" max="45" step="1" value="0">
+  <div id="rollValue" class="value">0°</div>
+
+  <div class="value">
+    3D drag rotation:
+    X <span id="dragXValue">0.0°</span> ·
+    Y <span id="dragYValue">0.0°</span>
+  </div>
+
+  <div class="checks">
+    <label><input id="xray" type="checkbox" checked> Show hidden rear facets</label>
+    <label><input id="edges" type="checkbox" checked> Show all edges</label>
+    <label><input id="path" type="checkbox" checked> Show selected band centerline</label>
+  </div>
+  <div class="value">Turn off <b>Show all edges</b> to see the numbered connection points.</div>
+
+  <button id="front">Reset to matched front view</button>
+
+  <label for="preset">Colour preset</label>
+  <select id="preset">
+    <option value="ocean">Blue / green</option>
+    <option value="warm">Yellow / orange / red</option>
+    <option value="purple">Pink / magenta / purple / violet</option>
+    <option value="custom">Custom</option>
+  </select>
+
+  <div class="legend" id="legend"></div>
+
+  <details class="about">
+    <summary>About this model</summary>
+    <h2>What it is</h2>
+    <img src="preview.png" alt="Mobius torus geometric pattern rendered as a 3D model, front view, 8 coloured crescent bands" width="260" style="max-width:100%;height:auto;display:block;margin:8px 0">
+    <p>The <b>Mobius torus</b> (also spelled Möbius or Moebius torus, also called a twisted torus) is a
+    geometric line drawing: a donut shape with an octagonal opening, covered in rhombus-shaped facets that
+    spiral from the inner opening to the outer rim. It is used as a stained glass pattern, a
+    colouring page and geometric line art. This page turns that flat 2D pattern into an interactive
+    3D model.</p>
+    <h2>Purpose</h2>
+    <p>To visualise a flat drawing in 3D: to see what the hidden back looks like, and to follow
+    each twisted band as it climbs the front, crosses the rim, travels around the back and comes
+    back through the opening.</p>
+    <h2>What it shows</h2>
+    <p>The front view matches the flat drawing line for line. Each of the 8 crescent bands starts on one
+    side of the octagonal opening and climbs 7 sections to the rim. The back follows the same geometry
+    as the front, so each band makes one full turn around the hole and closes on itself:
+    8 separate bands, coloured here with 4 colours.</p>
+    <p>About the name: despite being called a Mobius torus, the surface is not a Möbius strip. A torus
+    always has an inside and an outside; it is the bands on it that are twisted.</p>
+    <p>The facets that look like rhombs are rectangles seen at an angle. Each corner of the octagonal
+    opening is a short vertical edge on the inner wall, seen end-on, which is why the
+    octagon's sides tilt in depth.</p>
+    <h2>How to use</h2>
+    <p>Drag to rotate, scroll to zoom. Highlight one band to see its centerline (dashed where it
+    passes behind). Choose a colour preset or pick your own colours to try colouring ideas.</p>
+  </details>
+</aside>
+
+<main>
+  <noscript>This interactive 3D twisted torus viewer needs JavaScript enabled.</noscript>
+  <svg id="svg" viewBox="-420 -420 840 840"></svg>
+  <div class="hint">Drag to rotate · wheel to zoom</div>
+</main>
+</div>
+
+<script>
+(() => {
+  const svg=document.getElementById("svg");
+  const NS="http://www.w3.org/2000/svg";
+  const bandSelect=document.getElementById("band");
+  const opacityInput=document.getElementById("opacity");
+  const rollInput=document.getElementById("roll");
+  const opacityValue=document.getElementById("opacityValue");
+  const rollValue=document.getElementById("rollValue");
+  const dragXValue=document.getElementById("dragXValue");
+  const dragYValue=document.getElementById("dragYValue");
+  const xrayInput=document.getElementById("xray");
+  const edgesInput=document.getElementById("edges");
+  const pathInput=document.getElementById("path");
+
+  // ===================== GEOMETRY (3D sectioned donut) =====================
+  // 8 band lines X = 0..7. Each line has 16 points per trip around the tube:
+  //   k = 0      inner wall, just below the octagon corner   (back side)
+  //   k = 1      next octagon corner, just above             (front side)
+  //   k = 1..8   7 sections climbing the front to the rim
+  //   k = 8, 9   crossing the outer rim
+  //   k = 9..16  7 sections down the back, same rhythm as the front
+  // Result: after one trip around the tube a line returns to its OWN start (X, k+16) = (X, k).
+  // So the 8 crescents are 8 separate closed bands; with 4 colours each colour is used twice.
+  // Every facet (your rule):  (X,k) (X,k+1) (X-1,k+3) (X-1,k+2)
+  // Each octagon corner is a short VERTICAL edge on the inner wall, seen end-on from the front.
+  // So each octagon side is tilted in depth, and the facets on it are rectangles seen at an angle.
+  const LINES=8, K=16, SHIFT=0;   // 16 points per trip: 1 + 7 front + 1 + 7 back
+  const DEG=Math.PI/180;
+  // ---- colours: 4 pickers + presets (bands X and X+4 share colour X mod 4) ----
+  const PRESETS={
+    ocean:  {colors:["#b7d9ef","#4b83c4","#2a8b87","#67c9b8"], names:["Pale blue","Blue","Teal","Aqua green"]},
+    warm:   {colors:["#f6d65a","#ef8a2a","#b8322a","#f2735a"], names:["Lemon yellow","Orange","Brick red","Coral"]},
+    purple: {colors:["#f4a6c8","#c2187a","#5e2a8c","#a77bd6"], names:["Pink","Magenta","Purple","Violet"]}
+  };
+  let colors=PRESETS.ocean.colors.slice(), names=PRESETS.ocean.names.slice();
+  const presetSelect=document.getElementById("preset"), legendEl=document.getElementById("legend");
+  function buildLegend(){
+    legendEl.innerHTML="";
+    colors.forEach((c,i)=>{
+      const lab=document.createElement("label");
+      const inp=document.createElement("input"); inp.type="color"; inp.value=c;
+      const txt=document.createElement("span"); txt.textContent=`Colour ${i+1} – ${names[i]} (bands ${i+1} & ${i+5})`;
+      inp.addEventListener("input",()=>{
+        colors[i]=inp.value; names[i]=inp.value.toUpperCase(); txt.textContent=`Colour ${i+1} – ${names[i]} (bands ${i+1} & ${i+5})`;
+        presetSelect.value="custom"; updateBandLabels(); render();
+      });
+      lab.append(inp,txt); legendEl.appendChild(lab);
+    });
+  }
+  function updateBandLabels(){
+    [...bandSelect.options].forEach(o=>{const v=+o.value; if(v>=0) o.textContent=`Band ${v+1} – ${names[v%4]}`;});
+  }
+  presetSelect.addEventListener("input",()=>{
+    const p=PRESETS[presetSelect.value]; if(!p) return;
+    colors=p.colors.slice(); names=p.names.slice(); buildLegend(); updateBandLabels(); render();
+  });
+  const mod=(a,n)=>((a%n)+n)%n;
+
+  // --- front pattern, measured from the drawing (side 107, slanted edges 95.5 at atan(1/2)) ---
+  const SIDE=107, EL=95.5, ALPHA=Math.atan(0.5)/DEG;
+  const RO=SIDE/(2*Math.sin(Math.PI/8));
+  const Oct=m=>{const a=(-112.5+45*m)*DEG;return [RO*Math.cos(a),RO*Math.sin(a)]};
+  const Dv=(m,j)=>{const a=(-ALPHA-45*(j-m))*DEG;return [EL*Math.cos(a),EL*Math.sin(a)]};
+  const Sv=(m,j)=>{let x=0,y=0;for(let i=0;i<j;i++){const d=Dv(m,i);x+=d[0];y+=d[1]}return [x,y]};
+  function front2D(X,k){            // k = 0..9
+    const m=Math.floor(k/2);
+    const base = k%2===0 ? Oct(X+m) : Oct(X+m+1);
+    const s=Sv(X+m,m);
+    return [base[0]+s[0], base[1]+s[1]];
+  }
+  const RIM=Math.hypot(...front2D(0,8));
+  const Rmaj=(RO+RIM)/2, rmin=(RIM-RO)/2;
+  const WALL=0.32*rmin;             // half-height of the vertical edge at each octagon corner
+
+  let POINTS=null;                  // POINTS[X][k], k=0..K-1
+  function buildPoints(){
+    const P=[];
+    for(let X=0;X<LINES;X++){
+      P[X]=[];
+      for(let k=0;k<=9;k++){
+        const [x,y]=front2D(X,k);
+        const rho=Math.hypot(x,y);
+        let z=Math.sqrt(Math.max(0,rmin*rmin-(rho-Rmaj)*(rho-Rmaj)));
+        if(k===0) z=-WALL;          // bottom of octagon corner
+        if(k===1) z= WALL;          // top of octagon corner
+        if(k===9) z=-z;             // just over the rim, on the back
+        P[X][k]={x,y,z};
+      }
+    }
+    // BACK, derived from the front's own rhythm (no assumption about where the band lands):
+    // the band crosses the back with the same step pattern it uses on the front, in reverse
+    // order (rim -> hole), at the same radii, below the equator. The only adjustment is a
+    // ~3% stretch of the angular steps so the line closes exactly at an octagon corner.
+    for(let X=0;X<LINES;X++){
+      const uf=k=>Math.atan2(P[X][k].y,P[X][k].x);
+      const steps=[]; let sum=0;
+      for(let m=1;m<=7;m++){ let d=mod(uf(9-m)-uf(8-m),2*Math.PI); steps.push(d); sum+=d; }
+      const u9=uf(9);
+      const target=Math.atan2(P[mod(X+SHIFT,LINES)][0].y,P[mod(X+SHIFT,LINES)][0].x);
+      const need=mod(target-u9,2*Math.PI);
+      const scale=need/sum;
+      let u=u9;
+      for(let m=1;m<=6;m++){
+        u+=steps[m-1]*scale;
+        const src=P[X][8-m];
+        const rho=Math.hypot(src.x,src.y);
+        const t=m/7;
+        const uu=u;
+        P[X][9+m]={x:rho*Math.cos(uu), y:rho*Math.sin(uu), z:-src.z};
+      }
+    }
+    return P;
+  }
+
+  // canonical point lookup: (X,k+16) = (X,k)
+  function pt(X,k){
+    const w=Math.floor(k/K);
+    return POINTS[mod(X+w*SHIFT,LINES)][mod(k,K)];
+  }
+  function pid(X,k){
+    const w=Math.floor(k/K);
+    return mod(X+w*SHIFT,LINES)*K + mod(k,K) + 1;
+  }
+  function face(X,j){
+    return [[X,j],[X,j+1],[X-1,j+3],[X-1,j+2]];
+  }
+  const band=X=>mod(X,4);   // colour index: bands X and X+4 share a colour
+
+  function validate(){
+    const cnt=new Map();
+    for(let X=0;X<LINES;X++)for(let j=0;j<K;j++){
+      const ids=face(X,j).map(([a,b])=>pid(a,b));
+      for(let e=0;e<4;e++){const a=ids[e],b=ids[(e+1)%4];const key=a<b?a+"-"+b:b+"-"+a;cnt.set(key,(cnt.get(key)||0)+1)}
+    }
+    let bad=0;cnt.forEach(v=>{if(v!==2)bad++});return bad;
+  }
+
+  let rx=0, ry=0, rz=0, zoom=1.0;
+  let dragging=false,lastX=0,lastY=0;
+
+  function rotate(p){
+    let{x,y,z}=p;
+    let c=Math.cos(rx),s=Math.sin(rx);
+    [y,z]=[y*c-z*s,y*s+z*c];
+    c=Math.cos(ry);s=Math.sin(ry);
+    [x,z]=[x*c+z*s,-x*s+z*c];
+    c=Math.cos(rz);s=Math.sin(rz);
+    [x,y]=[x*c-y*s,x*s+y*c];
+    return{x:x*zoom,y:y*zoom,z:z*zoom};
+  }
+  function projectRotated(q){return{x:q.x,y:q.y,z:q.z}}   // orthographic, like the drawing
+  function project(p){return projectRotated(rotate(p))}
+
+  function center(pts){
+    const c={x:0,y:0,z:0};
+    pts.forEach(p=>{c.x+=p.x;c.y+=p.y;c.z+=p.z});
+    c.x/=pts.length;c.y/=pts.length;c.z/=pts.length;
+    return c;
+  }
+  function el(name,attrs={}){
+    const e=document.createElementNS(NS,name);
+    Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v));
+    return e;
+  }
+  function drawPoly(pts,attrs){
+    const e=el("polygon",attrs);
+    e.setAttribute("points",pts.map(p=>`${p.x.toFixed(2)},${p.y.toFixed(2)}`).join(" "));
+    svg.appendChild(e);
+  }
+  function drawLine(pts,attrs){
+    const e=el("polyline",attrs);
+    e.setAttribute("fill","none");
+    e.setAttribute("points",pts.map(p=>`${p.x.toFixed(2)},${p.y.toFixed(2)}`).join(" "));
+    svg.appendChild(e);
+  }
+  function drawCircle(p,r,attrs){
+    const e=el("circle",attrs);
+    e.setAttribute("cx",p.x.toFixed(2));e.setAttribute("cy",p.y.toFixed(2));e.setAttribute("r",r);
+    svg.appendChild(e);
+  }
+  function drawText(p,text,attrs){
+    const e=el("text",attrs);
+    e.setAttribute("x",(p.x+8).toFixed(2));e.setAttribute("y",(p.y-8).toFixed(2));
+    e.textContent=text;svg.appendChild(e);
+  }
+  function updateValueDisplays(){
+    opacityValue.textContent = `${Math.round((+opacityInput.value)*100)}%`;
+    rollValue.textContent = `${(+rollInput.value).toFixed(0)}°`;
+    dragXValue.textContent = `${(rx * 180 / Math.PI).toFixed(1)}°`;
+    dragYValue.textContent = `${(ry * 180 / Math.PI).toFixed(1)}°`;
+  }
+
+  // outward torus normal at a point (used to orient every facet once)
+  function outward(p){
+    const rho=Math.hypot(p.x,p.y)||1, cx=p.x/rho*Rmaj, cy=p.y/rho*Rmaj;
+    return {x:p.x-cx,y:p.y-cy,z:p.z};
+  }
+  function normal(q){
+    const a={x:q[2].x-q[0].x,y:q[2].y-q[0].y,z:q[2].z-q[0].z};
+    const b={x:q[3].x-q[1].x,y:q[3].y-q[1].y,z:q[3].z-q[1].z};
+    return {x:a.y*b.z-a.z*b.y,y:a.z*b.x-a.x*b.z,z:a.x*b.y-a.y*b.x};
+  }
+  let SIGN=1;
+
+  // ---- shading: one fixed light in space, from the bottom left and slightly in front.
+  //      The light does not move; rotating the model turns the facets toward or away from it. ----
+  const LIGHT=(()=>{const v={x:-0.62,y:0.62,z:0.48};const l=Math.hypot(v.x,v.y,v.z);return {x:v.x/l,y:v.y/l,z:v.z/l}})();
+  function lightLevel(nn){
+    const n = nn.z<0 ? {x:-nn.x,y:-nn.y,z:-nn.z} : nn;           // rear facets lit as seen through
+    const d=Math.max(0, n.x*LIGHT.x+n.y*LIGHT.y+n.z*LIGHT.z);
+    const h={x:LIGHT.x,y:LIGHT.y,z:LIGHT.z+1}, hl=Math.hypot(h.x,h.y,h.z);
+    const spec=Math.pow(Math.max(0,(n.x*h.x+n.y*h.y+n.z*h.z)/hl),24);
+    return {k:0.55+0.55*d, spec:0.18*spec};
+  }
+  function shadeColor(hex,{k,spec}){
+    const c=parseInt(hex.slice(1),16), ch=[(c>>16)&255,(c>>8)&255,c&255];
+    return "rgb("+ch.map(v=>Math.round(Math.min(255, v*k + (255-v*k)*spec))).join(",")+")";
+  }
+
+  function render(){
+    svg.innerHTML="";
+    updateValueDisplays();
+    const selected=+bandSelect.value;
+    const alpha=+opacityInput.value;
+    rz = (+rollInput.value) * Math.PI / 180;
+    const xray=xrayInput.checked;
+    const showEdges=edgesInput.checked;
+    const showPath=pathInput.checked;
+
+    if(!POINTS){
+      POINTS=buildPoints();
+      const q=face(0,3).map(([a,b])=>pt(a,b)), n=normal(q), o=outward(center(q));
+      SIGN = (n.x*o.x+n.y*o.y+n.z*o.z)>0 ? 1 : -1;
+      const bad=validate();
+      document.getElementById("status").textContent = bad ? `⚠ ${bad} broken edges` : "8 closed bands · 4 colours";
+    }
+
+    const faces=[];
+    for(let X=0;X<LINES;X++){
+      for(let j=0;j<K;j++){
+        const world=face(X,j).map(([a,b])=>pt(a,b));
+        const rot=world.map(rotate);
+        const n=normal(rot);
+        const nl=Math.hypot(n.x,n.y,n.z)||1;
+        const nn={x:SIGN*n.x/nl, y:SIGN*n.y/nl, z:SIGN*n.z/nl};   // outward unit normal, view space
+        faces.push({line:X, band:band(X), j, proj:rot.map(projectRotated), z:center(rot).z, rear:nn.z<0, nn});
+      }
+    }
+    faces.sort((a,b)=>a.z-b.z);
+
+    for(const f of faces){
+      const active=(selected===-1 || f.line===selected);
+      const rear=f.rear;
+      if(!xray && rear)continue;
+      let fillOpacity=selected===-1 ? alpha : (active?alpha:Math.min(alpha,.06));
+      if(rear) fillOpacity*= xray ? .35 : 1;
+      const strokeOpacity=showEdges ? (active?.9:.18)*(rear?.5:1) : 0;
+      drawPoly(f.proj,{
+        fill:shadeColor(colors[f.band], lightLevel(f.nn)),
+        "fill-opacity":fillOpacity,
+        stroke:showEdges ? "#222" : "none",
+        "stroke-width":showEdges ? (active?1.4:0.8) : 0,
+        "stroke-opacity":strokeOpacity,
+        "stroke-dasharray":showEdges && rear ? "5 5" : "",
+        "stroke-linejoin":"round"
+      });
+    }
+
+    if(!showEdges){
+      const pts=[];
+      for(let X=0;X<LINES;X++)for(let k=0;k<K;k++){
+        const rot=rotate(POINTS[X][k]);
+        const rearPoint=rot.z<0;
+        if(!xray && rearPoint) continue;
+        pts.push({id:X*K+k+1, proj:projectRotated(rot), rear:rearPoint});
+      }
+      pts.sort((a,b)=>(a.rear===b.rear)?0:(a.rear?-1:1));
+      for(const p of pts){
+        drawCircle(p.proj,4.2,{fill:p.rear?"#444":"#111","fill-opacity":p.rear?.45:.9,stroke:"#fff","stroke-width":"0.8"});
+        drawText(p.proj,String(p.id),{"font-size":"15","font-family":"Arial, Helvetica, sans-serif",fill:p.rear?"#555":"#111","fill-opacity":p.rear?.55:.95});
+      }
+    }
+
+    if(selected>=0 && showPath){
+      // one band = one trip around the tube; the line follows the middle of its facets.
+      for(const X0 of [selected]){
+      const seq=[];
+      for(let j=0;j<K;j++) seq.push(rotate(center(face(X0,j).map(([a,b])=>pt(a,b)))));
+      seq.push(seq[0]);
+      for(let i=0;i<seq.length-1;i++){
+        const a=seq[i],b=seq[i+1];
+        const hidden=(a.z+b.z)/2<0;
+        drawLine([a,b],{stroke:"#111","stroke-width":hidden?2:5,"stroke-opacity":hidden?.55:.9,
+          "stroke-dasharray":hidden?"4 6":"","stroke-linecap":"round"});
+        if(!hidden) drawLine([a,b],{stroke:colors[selected%4],"stroke-width":2.4,"stroke-linecap":"round"});
+      }
+      }
+    }
+  }
+
+  svg.addEventListener("pointerdown",e=>{
+    dragging=true;lastX=e.clientX;lastY=e.clientY;svg.setPointerCapture(e.pointerId);
+  });
+  svg.addEventListener("pointermove",e=>{
+    if(!dragging)return;
+    ry+=(e.clientX-lastX)*.008;
+    rx+=(e.clientY-lastY)*.008;
+    lastX=e.clientX;lastY=e.clientY;
+    render();
+  });
+  svg.addEventListener("pointerup",()=>dragging=false);
+  svg.addEventListener("pointercancel",()=>dragging=false);
+  svg.addEventListener("wheel",e=>{
+    e.preventDefault();
+    zoom*=e.deltaY<0?1.06:.94;
+    zoom=Math.max(.55,Math.min(1.7,zoom));
+    render();
+  },{passive:false});
+
+  [bandSelect,opacityInput,rollInput,xrayInput,edgesInput,pathInput].forEach(x=>x.addEventListener("input",render));
+
+  document.getElementById("front").addEventListener("click",()=>{
+    rx=0; ry=0; rz=0; zoom=1;
+    rollInput.value = 0;
+    opacityInput.value = 0.65;
+    render();
+  });
+
+  const q=new URLSearchParams(location.search);
+  if(q.has("band"))bandSelect.value=q.get("band");
+  if(q.has("rx"))rx=+q.get("rx"); if(q.has("ry"))ry=+q.get("ry");
+  if(q.has("edges"))edgesInput.checked=q.get("edges")==="1";
+  if(q.has("xray"))xrayInput.checked=q.get("xray")==="1";
+  buildLegend(); updateBandLabels();
+  if(q.has("preset")){presetSelect.value=q.get("preset");presetSelect.dispatchEvent(new Event("input"));}
+  window.__front=()=>{const o=[];for(let X=0;X<8;X++)for(let j=0;j<7;j++)o.push(face(X,j).map(([a,b])=>{const p=pt(a,b);return [p.x,p.y]}));return o};
+  render();
+})();
+</script>
+</body>
+</html>
