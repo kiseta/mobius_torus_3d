@@ -129,9 +129,429 @@
 <main>
   <noscript>This interactive 3D twisted torus viewer needs JavaScript enabled.</noscript>
   <svg id="svg" viewBox="-420 -420 840 840"></svg>
-  <div class="hint">Drag to rotate · wheel to zoom</div>
+  <div class="hint">Drag to rotate · Ctrl + wheel to zoom</div>
 </main>
 </div>
+<iframe srcdoc="&lt;!doctype html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;utf-8&quot;&gt;
+&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1&quot;&gt;
+&lt;title&gt;Mobius Torus – From Pipe to Torus&lt;/title&gt;
+&lt;meta name=&quot;description&quot; content=&quot;How the Mobius torus geometric model forms: a striped pipe, cut into sections, bent into a ring, twisted and connected.&quot;&gt;
+&lt;style&gt;
+  :root{--bg:#f7f7f5;--panel:#fff;--ink:#222}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--ink)}
+  .wrap{display:grid;grid-template-columns:310px 1fr;height:100vh}
+  aside{padding:18px;background:var(--panel);border-right:1px solid #ddd;overflow-y:auto}
+  h1{font-size:18px;margin:0 0 12px}
+  .step{font-size:12px;color:#555;margin:0 0 4px}
+  h2{font-size:16px;margin:0 0 6px}
+  p{font-size:13px;line-height:1.4;margin:0 0 10px}
+  label{display:block;font-size:13px;margin:12px 0 5px}
+  .value{font-size:12px;color:#555;margin:4px 0 8px}
+  input[type=range]{width:100%}
+  .nav{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+  button{padding:8px;background:#fff;border:1px solid #aaa;border-radius:5px;cursor:pointer;font-size:13px}
+  button:disabled{opacity:.4;cursor:default}
+  button.full{width:100%;margin-top:6px}
+  .checks label{display:flex;gap:8px;align-items:center}
+  .result{font-size:14px;font-weight:bold;margin:8px 0}
+  main{position:relative;overflow:hidden;height:100vh}
+  canvas{width:100%;height:100%;display:block;cursor:grab;touch-action:none}
+  canvas:active{cursor:grabbing}
+  .hint{position:absolute;right:14px;bottom:12px;font-size:12px;background:#ffffffdd;padding:7px 9px;border:1px solid #ddd;border-radius:6px}
+  @media(max-width:800px){.wrap{grid-template-columns:1fr;height:auto}aside{overflow:visible}main{height:70vh}}
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div class=&quot;wrap&quot;&gt;
+&lt;aside&gt;
+  &lt;h1&gt;Mobius Torus – from pipe to torus&lt;/h1&gt;
+  &lt;div class=&quot;step&quot; id=&quot;stepNo&quot;&gt;&lt;/div&gt;
+  &lt;h2 id=&quot;stepTitle&quot;&gt;&lt;/h2&gt;
+  &lt;p id=&quot;stepText&quot;&gt;&lt;/p&gt;
+
+  &lt;div id=&quot;twistBox&quot; hidden&gt;
+    &lt;label for=&quot;twist&quot;&gt;Twist of one end&lt;/label&gt;
+    &lt;input id=&quot;twist&quot; type=&quot;range&quot; min=&quot;0&quot; max=&quot;360&quot; step=&quot;1&quot; value=&quot;0&quot;&gt;
+    &lt;div class=&quot;value&quot; id=&quot;twistValue&quot;&gt;0°&lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div id=&quot;resultBox&quot; hidden&gt;
+    &lt;div class=&quot;result&quot; id=&quot;result&quot;&gt;&lt;/div&gt;
+    &lt;div class=&quot;checks&quot;&gt;&lt;label&gt;&lt;input id=&quot;compare&quot; type=&quot;checkbox&quot;&gt; Compare with faceted model&lt;/label&gt;&lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;nav&quot;&gt;
+    &lt;button id=&quot;back&quot;&gt;◀ Back&lt;/button&gt;
+    &lt;button id=&quot;next&quot;&gt;Next ▶&lt;/button&gt;
+  &lt;/div&gt;
+  &lt;button id=&quot;front&quot; class=&quot;full&quot;&gt;Front view&lt;/button&gt;
+  &lt;button id=&quot;tilt&quot; class=&quot;full&quot;&gt;Tilted view&lt;/button&gt;
+&lt;/aside&gt;
+&lt;main&gt;
+  &lt;canvas id=&quot;cv&quot;&gt;&lt;/canvas&gt;
+  &lt;div class=&quot;hint&quot;&gt;Drag to rotate · Ctrl + wheel to zoom&lt;/div&gt;
+&lt;/main&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+(() =&gt; {
+const $=id=&gt;document.getElementById(id);
+const cv=$(&quot;cv&quot;), ctx=cv.getContext(&quot;2d&quot;);
+const DEG=Math.PI/180, mod=(a,n)=&gt;((a%n)+n)%n;
+const LINES=8, K=16, SHIFT=0;
+
+/* ---------- the faceted model (same code as the main page), used for size and comparison ---------- */
+  // --- front pattern, measured from the drawing (side 107, slanted edges 95.5 at atan(1/2)) ---
+  const SIDE=107, EL=95.5, ALPHA=Math.atan(0.5)/DEG;
+  const RO=SIDE/(2*Math.sin(Math.PI/8));
+  const Oct=m=&gt;{const a=(-112.5+45*m)*DEG;return [RO*Math.cos(a),RO*Math.sin(a)]};
+  const Dv=(m,j)=&gt;{const a=(-ALPHA-45*(j-m))*DEG;return [EL*Math.cos(a),EL*Math.sin(a)]};
+  const Sv=(m,j)=&gt;{let x=0,y=0;for(let i=0;i&lt;j;i++){const d=Dv(m,i);x+=d[0];y+=d[1]}return [x,y]};
+  function front2D(X,k){            // k = 0..9
+    const m=Math.floor(k/2);
+    const base = k%2===0 ? Oct(X+m) : Oct(X+m+1);
+    const s=Sv(X+m,m);
+    return [base[0]+s[0], base[1]+s[1]];
+  }
+  const RIM=Math.hypot(...front2D(0,8));
+  const Rmaj=(RO+RIM)/2, rmin=(RIM-RO)/2;
+  const WALL=0.32*rmin;             // half-height of the vertical edge at each octagon corner
+
+  function buildPoints(){
+    const P=[];
+    for(let X=0;X&lt;LINES;X++){
+      P[X]=[];
+      for(let k=0;k&lt;=9;k++){
+        const [x,y]=front2D(X,k);
+        const rho=Math.hypot(x,y);
+        let z=Math.sqrt(Math.max(0,rmin*rmin-(rho-Rmaj)*(rho-Rmaj)));
+        if(k===0) z=-WALL;          // bottom of octagon corner
+        if(k===1) z= WALL;          // top of octagon corner
+        if(k===9) z=-z;             // just over the rim, on the back
+        P[X][k]={x,y,z};
+      }
+    }
+    // BACK, derived from the front&#x27;s own rhythm (no assumption about where the band lands):
+    // the band crosses the back with the same step pattern it uses on the front, in reverse
+    // order (rim -&gt; hole), at the same radii, below the equator. The only adjustment is a
+    // ~3% stretch of the angular steps so the line closes exactly at an octagon corner.
+    for(let X=0;X&lt;LINES;X++){
+      const uf=k=&gt;Math.atan2(P[X][k].y,P[X][k].x);
+      const steps=[]; let sum=0;
+      for(let m=1;m&lt;=7;m++){ let d=mod(uf(9-m)-uf(8-m),2*Math.PI); steps.push(d); sum+=d; }
+      const u9=uf(9);
+      const target=Math.atan2(P[mod(X+SHIFT,LINES)][0].y,P[mod(X+SHIFT,LINES)][0].x);
+      const need=mod(target-u9,2*Math.PI);
+      const scale=need/sum;
+      let u=u9;
+      for(let m=1;m&lt;=6;m++){
+        u+=steps[m-1]*scale;
+        const src=P[X][8-m];
+        const rho=Math.hypot(src.x,src.y);
+        const t=m/7;
+        const uu=u;
+        P[X][9+m]={x:rho*Math.cos(uu), y:rho*Math.sin(uu), z:-src.z};
+      }
+    }
+    return P;
+  }
+
+  function face(X,j){
+    return [[X,j],[X,j+1],[X-1,j+3],[X-1,j+2]];
+  }
+
+let POINTS=buildPoints();
+function pt(X,k){const w=Math.floor(k/K);return POINTS[mod(X+w*SHIFT,LINES)][mod(k,K)];}
+
+/* ---------- pipe: same size as the faceted model ---------- */
+const r=rmin, L=2*Math.PI*Rmaj;        // pipe radius and length (centre line)
+const STRIPES=8, RINGS=16, SUBA=6, SUBL=5;
+const NA=STRIPES*SUBA, NL=RINGS*SUBL;
+const GAP=0.45;                          // open gap of the bent ring (radians)
+const colors=[&quot;#b7d9ef&quot;,&quot;#4b83c4&quot;,&quot;#2a8b87&quot;,&quot;#67c9b8&quot;,&quot;#b7d9ef&quot;,&quot;#4b83c4&quot;,&quot;#2a8b87&quot;,&quot;#67c9b8&quot;];   // blue/green, twice
+const GREY=&quot;#d9d9d6&quot;;
+
+// state animated between steps
+const S={ext:0,col:0,rings:0,bend:0,tw:0,close:0};
+let twistSign=1, PHI0=0;
+
+// centre line point, tangent, outward normal for arclength u in [-L/2, L/2]
+function frame(u,st){
+  const theta=st.bend*(2*Math.PI-GAP*(1-st.close));
+  const k=theta/L;                      // curvature
+  const a=u*k;
+  let cx,cy;
+  if(Math.abs(k)&lt;1e-9){cx=u;cy=0;}
+  else{cx=Math.sin(a)/k; cy=(1-Math.cos(a))/k;}
+  const T={x:Math.cos(a),y:Math.sin(a)};
+  const Nout={x:Math.sin(a),y:-Math.cos(a)};   // away from the centre of curvature
+  return {c:{x:cx,y:cy},T,Nout};
+}
+function surf(u,phi,st,rs=1){
+  const f=frame(u,st);
+  const rr=r*rs;
+  const psi=phi + twistSign*st.tw*DEG*(u/L+0.5);
+  const cr=Math.cos(psi), sr=Math.sin(psi);
+  const n={x:f.Nout.x*cr, y:f.Nout.y*cr, z:sr};
+  return {p:{x:f.c.x+rr*n.x, y:f.c.y+rr*n.y, z:rr*n.z}, n};
+}
+
+// fit stripe phase and twist direction to the faceted model (closed, 360°)
+(function fit(){
+  const st={ext:1,col:1,rings:1,bend:1,tw:0,close:1};
+  const cen=centre(st);
+  const ang=u=&gt;{const c=frame(u,st).c;return Math.atan2(c.y-cen.y,c.x-cen.x)};
+  const sdir=Math.sign(mod(ang(-L/2+1)-ang(-L/2)+Math.PI,2*Math.PI)-Math.PI);
+  const seam=ang(-L/2);
+  let best=null;
+  for(const dir of [1,-1]){
+    let sx=0,sy=0;
+    for(let X=0;X&lt;LINES;X++)for(let k=0;k&lt;K;k++){
+      const q=POINTS[X][k], rho=Math.hypot(q.x,q.y);
+      const th=Math.atan2(q.y,q.x), v=Math.atan2(q.z,rho-Rmaj);
+      const w=STRIPES*(v-dir*th); sx+=Math.cos(w); sy+=Math.sin(w);
+    }
+    const R=Math.hypot(sx,sy);
+    if(!best||R&gt;best.R) best={R,dir,mean:Math.atan2(sy,sx)/STRIPES};
+  }
+  // psi_boundary = PHI0 + twistSign*2π*f,  f = sdir*(θ-seam)/2π  -&gt;  psi = PHI0 + twistSign*sdir*(θ-seam)
+  twistSign=best.dir*sdir;
+  PHI0=best.mean+best.dir*seam;
+})();
+
+function centre(st){
+  let x=0,y=0;const n=64;
+  for(let i=0;i&lt;n;i++){const c=frame(-L/2+L*(i+.5)/n,st).c;x+=c.x;y+=c.y}
+  return {x:x/n,y:y/n};
+}
+
+/* ---------- view ---------- */
+let rx=-0.45, ry=0.55, zoom=1, dragging=false, lx=0, ly=0;
+function rot(p){
+  let {x,y,z}=p,c,s;
+  c=Math.cos(ry);s=Math.sin(ry);[x,z]=[x*c+z*s,-x*s+z*c];
+  c=Math.cos(rx);s=Math.sin(rx);[y,z]=[y*c-z*s,y*s+z*c];
+  return {x,y,z};
+}
+const LIGHT=(()=&gt;{const v={x:-0.62,y:0.62,z:0.48};const l=Math.hypot(v.x,v.y,v.z);return {x:v.x/l,y:v.y/l,z:v.z/l}})();
+function shade(hex,n){
+  const d=Math.max(0,n.x*LIGHT.x+n.y*LIGHT.y+n.z*LIGHT.z);
+  const h={x:LIGHT.x,y:LIGHT.y,z:LIGHT.z+1},hl=Math.hypot(h.x,h.y,h.z);
+  const sp=0.2*Math.pow(Math.max(0,(n.x*h.x+n.y*h.y+n.z*h.z)/hl),30);
+  const k=0.5+0.6*d;
+  const c=parseInt(hex.slice(1),16),ch=[(c&gt;&gt;16)&amp;255,(c&gt;&gt;8)&amp;255,c&amp;255];
+  return &quot;rgb(&quot;+ch.map(v=&gt;Math.round(Math.min(255,v*k+(255-v*k)*sp))).join(&quot;,&quot;)+&quot;)&quot;;
+}
+function mix(a,b,t){
+  const A=parseInt(a.slice(1),16),B=parseInt(b.slice(1),16);
+  const ch=[16,8,0].map(s=&gt;Math.round(((A&gt;&gt;s)&amp;255)*(1-t)+((B&gt;&gt;s)&amp;255)*t));
+  return &quot;#&quot;+ch.map(v=&gt;v.toString(16).padStart(2,&quot;0&quot;)).join(&quot;&quot;);
+}
+
+let W=0,H=0,DPR=1;
+function resize(){DPR=window.devicePixelRatio||1;W=cv.clientWidth;H=cv.clientHeight;cv.width=W*DPR;cv.height=H*DPR;render()}
+
+function render(){
+  if(!W) return;
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  ctx.clearRect(0,0,W,H);
+  const st=S, len=L*st.ext;
+  const cen = st.bend&gt;0 ? centre(st) : {x:0,y:0};
+  const P=(u,phi,rs)=&gt;{const s=surf(u,phi,st,rs);return {p:rot({x:s.p.x-cen.x,y:s.p.y-cen.y,z:s.p.z}),n:rot(s.n)}};
+  // fit to screen
+  const ext = st.bend&lt;0.5 ? Math.max(len/2+r, r*1.4) : (Rmaj+r)*1.05;
+  const extent = st.bend&gt;0 &amp;&amp; st.bend&lt;1 ? (len/2+r)*(1-st.bend)+(Rmaj+r)*1.05*st.bend : ext;
+  const scale=zoom*Math.min(W,H)*0.44/Math.max(extent,r*1.4);
+  const sx=v=&gt;W/2+v.x*scale, sy=v=&gt;H/2+v.y*scale;
+  const items=[];
+
+  if(st.ext&lt;=0.001){
+    // step 1: a plain circle (the pipe&#x27;s cross-section)
+    const pts=[];for(let i=0;i&lt;=96;i++){const s=surf(0,2*Math.PI*i/96,st);pts.push(rot(s.p))}
+    ctx.beginPath();pts.forEach((q,i)=&gt;i?ctx.lineTo(sx(q),sy(q)):ctx.moveTo(sx(q),sy(q)));
+    ctx.strokeStyle=&quot;#222&quot;;ctx.lineWidth=2;ctx.stroke();
+    drawCompare(st,cen,scale,sx,sy);
+    return;
+  }
+  const u0=-len/2;
+  const U=i=&gt;u0+len*i/NL, A=j=&gt;PHI0+2*Math.PI*j/NA;
+  const grid=[], kf=st.rings;
+  const corner=[];
+  for(let c=0;c&lt;=RINGS;c++){corner[c]=[];for(let b=0;b&lt;=STRIPES;b++)corner[c][b]=P(U(c*SUBL),A(b*SUBA)).p}
+  const lerp=(a,b,t)=&gt;({x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t,z:a.z+(b.z-a.z)*t});
+  for(let i=0;i&lt;=NL;i++){grid[i]=[];for(let j=0;j&lt;=NA;j++){
+    const sm=P(U(i),A(j));
+    if(kf&lt;=0){grid[i][j]=sm;continue}
+    const c=Math.min(RINGS-1,Math.floor(i/SUBL)), b=Math.min(STRIPES-1,Math.floor(j/SUBA));
+    const fi=(i-c*SUBL)/SUBL, fj=(j-b*SUBA)/SUBA;
+    const flat=lerp(lerp(corner[c][b],corner[c+1][b],fi),lerp(corner[c][b+1],corner[c+1][b+1],fi),fj);
+    grid[i][j]={p:lerp(sm.p,flat,kf), n:sm.n};
+  }}
+  const secN=(c,b)=&gt;{const a=corner[c][b],bb=corner[c+1][b],cc=corner[c+1][b+1],d=corner[c][b+1];
+    const u={x:cc.x-a.x,y:cc.y-a.y,z:cc.z-a.z}, v={x:d.x-bb.x,y:d.y-bb.y,z:d.z-bb.z};
+    const n={x:u.y*v.z-u.z*v.y,y:u.z*v.x-u.x*v.z,z:u.x*v.y-u.y*v.x};const l=Math.hypot(n.x,n.y,n.z)||1;return {x:n.x/l,y:n.y/l,z:n.z/l}};
+  const view={x:0,y:0,z:1};
+  for(let i=0;i&lt;NL;i++)for(let j=0;j&lt;NA;j++){
+    const q=[grid[i][j],grid[i+1][j],grid[i+1][j+1],grid[i][j+1]];
+    let n=P(U(i+.5),A(j+.5)).n;
+    if(kf&gt;0){                                   // flat panel shading: one normal per section
+      let f=secN(Math.floor(i/SUBL),Math.floor(j/SUBA));
+      if(f.x*n.x+f.y*n.y+f.z*n.z&lt;0) f={x:-f.x,y:-f.y,z:-f.z};
+      n={x:n.x*(1-kf)+f.x*kf,y:n.y*(1-kf)+f.y*kf,z:n.z*(1-kf)+f.z*kf};
+      const l=Math.hypot(n.x,n.y,n.z);n={x:n.x/l,y:n.y/l,z:n.z/l};
+    }
+    const stripe=Math.floor(j/SUBA), base=mix(GREY,colors[stripe],st.col);
+    const inside=n.z&lt;0;
+    let col = inside ? shade(base,{x:-n.x,y:-n.y,z:-n.z}) : shade(base,n);
+    items.push({z:(q[0].p.z+q[1].p.z+q[2].p.z+q[3].p.z)/4, poly:q.map(o=&gt;o.p), col, dark:inside &amp;&amp; st.close&lt;1});
+  }
+  // SECTIONS AS SEPARATE PIECES: each section is a rigid tile, slightly raised, with a gap around it,
+  // shaded with one flat normal (like a cut panel) and a light top edge / dark bottom edge bevel.
+  if(false){
+    const g=0.075*st.rings, lift=1+0.035*st.rings, T=3;
+    for(let c=0;c&lt;RINGS;c++)for(let b=0;b&lt;STRIPES;b++){
+      const i0=c*SUBL, j0=b*SUBA;
+      const ua=U(i0), ub=U(i0+SUBL), pa=A(j0), pb=A(j0+SUBA);
+      const tile=[];
+      for(let a=0;a&lt;=T;a++){tile[a]=[];for(let e=0;e&lt;=T;e++){
+        const fu=g+(1-2*g)*a/T, fp=g+(1-2*g)*e/T;
+        tile[a][e]=P(ua+(ub-ua)*fu, pa+(pb-pa)*fp, lift).p;
+      }}
+      const nC=P((ua+ub)/2,(pa+pb)/2).n;
+      const base=mix(GREY,colors[b],st.col);
+      // flat shading blended in as the pieces separate
+      for(let a=0;a&lt;T;a++)for(let e=0;e&lt;T;e++){
+        const q=[tile[a][e],tile[a+1][e],tile[a+1][e+1],tile[a][e+1]];
+        const nS=P(ua+(ub-ua)*(g+(1-2*g)*(a+.5)/T), pa+(pb-pa)*(g+(1-2*g)*(e+.5)/T)).n;
+        const w=st.rings*0.7;
+        let n={x:nS.x*(1-w)+nC.x*w,y:nS.y*(1-w)+nC.y*w,z:nS.z*(1-w)+nC.z*w};
+        const nl=Math.hypot(n.x,n.y,n.z); n={x:n.x/nl,y:n.y/nl,z:n.z/nl};
+        const inside=n.z&lt;0;
+        let col=inside?shade(base,{x:-n.x,y:-n.y,z:-n.z}):shade(base,n);
+        // bevel: outer ring of sub-tiles slightly darker so each piece has an edge
+        if(a===0||e===0||a===T-1||e===T-1){const k=1-0.1*st.rings;col=col.replace(/\d+/g,v=&gt;Math.round(v*k));}
+        items.push({z:(q[0].z+q[1].z+q[2].z+q[3].z)/4+r*0.12*st.rings, poly:q, col, dark:inside &amp;&amp; st.close&lt;1, tile:true});
+      }
+    }
+  }
+  // section lines: stripe boundaries (along) and ring cuts (around)
+  const lineA=st.col&gt;0?Math.min(1,st.col*1.5):0, lineR=st.rings;
+  if(lineA&gt;0)for(let b=0;b&lt;STRIPES;b++){const j=b*SUBA;for(let i=0;i&lt;NL;i++)items.push({z:(grid[i][j].p.z+grid[i+1][j].p.z)/2+r*0.12,seg:[grid[i][j].p,grid[i+1][j].p],a:lineA})}
+  if(lineR&gt;0)for(let c=0;c&lt;=RINGS;c++){const i=c*SUBL;for(let j=0;j&lt;NA;j++)items.push({z:(grid[i][j].p.z+grid[i][j+1].p.z)/2+r*0.12,seg:[grid[i][j].p,grid[i][j+1].p],a:(c===0||c===RINGS)?1:lineR})}
+  // open ends always outlined
+  if(st.close&lt;1)for(const i of [0,NL])for(let j=0;j&lt;NA;j++)items.push({z:(grid[i][j].p.z+grid[i][j+1].p.z)/2+r*0.13,seg:[grid[i][j].p,grid[i][j+1].p],a:1});
+
+  items.sort((a,b)=&gt;a.z-b.z);
+  for(const it of items){
+    if(it.poly){
+      ctx.beginPath();it.poly.forEach((q,i)=&gt;i?ctx.lineTo(sx(q),sy(q)):ctx.moveTo(sx(q),sy(q)));ctx.closePath();
+      ctx.fillStyle=it.col;ctx.fill();
+      ctx.strokeStyle=it.col;ctx.lineWidth=0.8;ctx.stroke();      // hide seams between sub-facets
+      if(it.tile){ctx.strokeStyle=&quot;rgba(0,0,0,0)&quot;;}
+      if(it.dark){ctx.fillStyle=&quot;rgba(0,0,0,.25)&quot;;ctx.fill()}
+    }else{
+      ctx.beginPath();ctx.moveTo(sx(it.seg[0]),sy(it.seg[0]));ctx.lineTo(sx(it.seg[1]),sy(it.seg[1]));
+      ctx.strokeStyle=`rgba(20,20,20,${0.9*it.a})`;ctx.lineWidth=1.3;ctx.lineCap=&quot;round&quot;;ctx.stroke();
+    }
+  }
+  drawCompare(st,cen,scale,sx,sy);
+}
+
+function drawCompare(st,cen,scale,sx,sy){
+  if(!(step===6 &amp;&amp; $(&quot;compare&quot;).checked)) return;
+  ctx.strokeStyle=&quot;rgba(220,30,30,.9)&quot;;ctx.lineWidth=1.3;
+  for(let X=0;X&lt;LINES;X++)for(let j=0;j&lt;K;j++){
+    const q=[[X,j],[X,j+1],[X-1,j+3],[X-1,j+2]].map(([a,b])=&gt;rot(pt(a,b)));
+    const ax=q[2].x-q[0].x, ay=q[2].y-q[0].y, bx=q[3].x-q[1].x, by=q[3].y-q[1].y;
+    const nz=ax*by-ay*bx;
+    if(SIGNF*nz&lt;=0) continue;            // only facets facing the viewer
+    ctx.beginPath();q.forEach((p,i)=&gt;i?ctx.lineTo(sx(p),sy(p)):ctx.moveTo(sx(p),sy(p)));ctx.closePath();ctx.stroke();
+  }
+}
+// orientation sign of faceted facets (front view, a front facet)
+const SIGNF=(()=&gt;{const q=[[0,3],[0,4],[-1,6],[-1,5]].map(([a,b])=&gt;pt(a,b));
+  const ax=q[2].x-q[0].x, ay=q[2].y-q[0].y, bx=q[3].x-q[1].x, by=q[3].y-q[1].y;return Math.sign(ax*by-ay*bx)})();
+
+/* ---------- steps ---------- */
+const STEPS=[
+  {t:&quot;Circle&quot;,       x:&quot;The cross-section of the pipe.&quot;,                                  s:{ext:0,col:0,rings:0,bend:0,close:0}},
+  {t:&quot;Pipe&quot;,         x:&quot;The circle is pulled out into a straight pipe.&quot;,                   s:{ext:1}},
+  {t:&quot;Stripes&quot;,      x:&quot;8 stripes along the length.&quot;,                                      s:{col:1}},
+  {t:&quot;Sections&quot;,     x:&quot;16 cuts around the pipe. Each of the 128 sections is a flat piece.&quot;,                           s:{rings:1}},
+  {t:&quot;Bend&quot;,         x:&quot;The pipe is bent into a ring. The ends are still open.&quot;,           s:{bend:1,close:0}},
+  {t:&quot;Twist&quot;,        x:&quot;One end is turned. Stripes line up with the other end every 45°.&quot;, s:{}},
+  {t:&quot;Connect&quot;,      x:&quot;&quot;,                                                                  s:{close:1}},
+];
+let step=0, anim=null;
+function target(n){
+  const t={ext:0,col:0,rings:0,bend:0,tw:0,close:0};
+  for(let i=0;i&lt;=n;i++)Object.assign(t,STEPS[i].s);
+  t.tw = n&gt;=5 ? +$(&quot;twist&quot;).value : 0;
+  if(n===6) t.tw=Math.round(t.tw/45)*45;
+  return t;
+}
+function bandsFor(tw){const k=mod(Math.round(tw/45),8);const g=(a,b)=&gt;b?g(b,a%b):a;return k===0?8:g(8,k)}
+function go(n){
+  step=n;
+  $(&quot;stepNo&quot;).textContent=`Step ${n+1} of ${STEPS.length}`;
+  $(&quot;stepTitle&quot;).textContent=STEPS[n].t;
+  $(&quot;twistBox&quot;).hidden=n!==5;
+  $(&quot;resultBox&quot;).hidden=n!==6;
+  $(&quot;back&quot;).disabled=n===0; $(&quot;next&quot;).disabled=n===STEPS.length-1;
+  const to=target(n);
+  if(n===6){
+    $(&quot;twist&quot;).value=to.tw; $(&quot;twistValue&quot;).textContent=to.tw+&quot;°&quot;;
+    const b=bandsFor(to.tw);
+    $(&quot;stepText&quot;).textContent=`Ends joined at ${to.tw}°.`;
+    $(&quot;result&quot;).textContent = b===1 ? &quot;Result: 1 single band&quot; : `Result: ${b} separate bands`;
+  }else $(&quot;stepText&quot;).textContent=STEPS[n].x;
+  if(n===5 &amp;&amp; +$(&quot;twist&quot;).value===0){ $(&quot;twist&quot;).value=360; to.tw=360; $(&quot;twistValue&quot;).textContent=&quot;360°&quot;; }
+  animateTo(to);
+}
+function animateTo(to){
+  const from={...S}, t0=performance.now(), dur=1300;
+  if(anim) cancelAnimationFrame(anim);
+  const ease=t=&gt;t&lt;.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+  const tick=now=&gt;{
+    const t=Math.min(1,(now-t0)/dur), e=ease(t);
+    for(const k in to) S[k]=from[k]+(to[k]-from[k])*e;
+    render();
+    if(t&lt;1) anim=requestAnimationFrame(tick); else anim=null;
+  };
+  anim=requestAnimationFrame(tick);
+}
+$(&quot;next&quot;).onclick=()=&gt;go(Math.min(STEPS.length-1,step+1));
+$(&quot;back&quot;).onclick=()=&gt;go(Math.max(0,step-1));
+$(&quot;twist&quot;).addEventListener(&quot;input&quot;,()=&gt;{S.tw=+$(&quot;twist&quot;).value;$(&quot;twistValue&quot;).textContent=S.tw+&quot;°&quot;;render()});
+$(&quot;compare&quot;).addEventListener(&quot;input&quot;,render);
+$(&quot;front&quot;).onclick=()=&gt;{rx=0;ry=0;zoom=1;render()};
+$(&quot;tilt&quot;).onclick=()=&gt;{rx=-0.45;ry=0.55;zoom=1;render()};
+
+cv.addEventListener(&quot;pointerdown&quot;,e=&gt;{dragging=true;lx=e.clientX;ly=e.clientY;cv.setPointerCapture(e.pointerId)});
+cv.addEventListener(&quot;pointermove&quot;,e=&gt;{if(!dragging)return;ry+=(e.clientX-lx)*.008;rx+=(e.clientY-ly)*.008;lx=e.clientX;ly=e.clientY;render()});
+cv.addEventListener(&quot;pointerup&quot;,()=&gt;dragging=false);
+cv.addEventListener(&quot;pointercancel&quot;,()=&gt;dragging=false);
+cv.addEventListener(&quot;wheel&quot;,e=&gt;{if(!e.ctrlKey)return;e.preventDefault();zoom=Math.max(.4,Math.min(3,zoom*(e.deltaY&lt;0?1.06:.94)));render()},{passive:false});
+window.addEventListener(&quot;resize&quot;,resize);
+
+// test hooks: ?step=6&amp;twist=360&amp;rx=0&amp;ry=0&amp;compare=1
+const q=new URLSearchParams(location.search);
+if(q.has(&quot;twist&quot;))$(&quot;twist&quot;).value=q.get(&quot;twist&quot;);
+if(q.has(&quot;rx&quot;))rx=+q.get(&quot;rx&quot;); if(q.has(&quot;ry&quot;))ry=+q.get(&quot;ry&quot;);
+if(q.has(&quot;compare&quot;))$(&quot;compare&quot;).checked=q.get(&quot;compare&quot;)===&quot;1&quot;;
+resize();
+const startStep=q.has(&quot;step&quot;)?+q.get(&quot;step&quot;):0;
+if(startStep&gt;0){ step=startStep; const to=target(startStep); if(startStep&gt;=5&amp;&amp;!q.has(&quot;twist&quot;)){to.tw=360;$(&quot;twist&quot;).value=360;} Object.assign(S,to); go(startStep); Object.assign(S,target(startStep)); }
+else go(0);
+})();
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+" title="Mobius torus: from pipe to torus" style="display:block;width:100%;height:100vh;border:0;border-top:1px solid #ddd"></iframe>
 
 <script>
 (() => {
@@ -447,6 +867,7 @@
   svg.addEventListener("pointerup",()=>dragging=false);
   svg.addEventListener("pointercancel",()=>dragging=false);
   svg.addEventListener("wheel",e=>{
+    if(!e.ctrlKey) return;
     e.preventDefault();
     zoom*=e.deltaY<0?1.06:.94;
     zoom=Math.max(.55,Math.min(1.7,zoom));
