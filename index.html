@@ -35,7 +35,7 @@
   :root{--bg:#f7f7f5;--panel:#fff;--ink:#222}
   *{box-sizing:border-box}
   body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--ink)}
-  .wrap{display:grid;grid-template-columns:310px 1fr;height:100vh}
+  .wrap{display:grid;grid-template-columns:310px 1fr;height:calc(100vh - 52px)}
   aside{padding:18px;background:var(--panel);border-right:1px solid #ddd;overflow-y:auto}
   h1{font-size:18px;margin:0 0 6px}
   .status{font-size:12px;color:#555;margin:0 0 10px}
@@ -51,7 +51,14 @@
   .legend label{display:flex;align-items:center;gap:8px;margin:0;font-size:12px}
   .legend input[type=color]{width:34px;height:24px;padding:0;border:1px solid #999;border-radius:4px;background:none;cursor:pointer}
   .sw{display:inline-block;width:13px;height:13px;border:1px solid #777;margin-right:6px;vertical-align:-2px}
-  main{position:relative;overflow:hidden;height:100vh}
+  main{position:relative;overflow:hidden;height:calc(100vh - 52px)}
+  .topbar{height:52px;display:flex;align-items:center;gap:18px;padding:0 18px;background:#fff;border-bottom:1px solid #ddd;overflow-x:auto}
+  .topbar .t{font-weight:bold;font-size:17px;white-space:nowrap}
+  .topbar .sub{font-size:13px;color:#555;white-space:nowrap}
+  .tabs{display:flex;gap:6px;margin-left:auto}
+  .tabs button{width:auto;margin:0;padding:8px 14px;font-size:14px;border:1px solid #aaa;border-radius:6px;background:#fff;cursor:pointer;white-space:nowrap}
+  .tabs button.on{background:#222;color:#fff;border-color:#222}
+  #view2{display:none;width:100%;height:calc(100vh - 52px);border:0}
   svg{width:100%;height:100vh;display:block;cursor:grab;user-select:none;touch-action:none}
   svg:active{cursor:grabbing}
   noscript{display:block;padding:20px}
@@ -60,7 +67,15 @@
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="topbar">
+  <span class="t">Mobius Torus in 3D</span>
+  <span class="sub">The flat Mobius torus drawing as a 3D model</span>
+  <div class="tabs">
+    <button id="tab1" class="on">1 · The model</button>
+    <button id="tab2">2 · How it forms</button>
+  </div>
+</div>
+<div class="wrap" id="view1">
 <aside>
   <h1>Möbius Torus in 3D</h1>
   <div class="status" id="status">8 closed bands · 4 colours</div>
@@ -132,7 +147,7 @@
   <div class="hint">Drag to rotate · Ctrl + wheel to zoom</div>
 </main>
 </div>
-<iframe srcdoc="&lt;!doctype html&gt;
+<iframe id="view2" title="Mobius torus: how it forms" srcdoc="&lt;!doctype html&gt;
 &lt;html lang=&quot;en&quot;&gt;
 &lt;head&gt;
 &lt;meta charset=&quot;utf-8&quot;&gt;
@@ -551,7 +566,7 @@ else go(0);
 &lt;/script&gt;
 &lt;/body&gt;
 &lt;/html&gt;
-" title="Mobius torus: from pipe to torus" style="display:block;width:100%;height:100vh;border:0;border-top:1px solid #ddd"></iframe>
+"></iframe>
 
 <script>
 (() => {
@@ -893,6 +908,12 @@ else go(0);
   window.__front=()=>{const o=[];for(let X=0;X<8;X++)for(let j=0;j<7;j++)o.push(face(X,j).map(([a,b])=>{const p=pt(a,b);return [p.x,p.y]}));return o};
   render();
 })();
+</script>
+<script>
+(()=>{const v1=document.getElementById("view1"),v2=document.getElementById("view2"),t1=document.getElementById("tab1"),t2=document.getElementById("tab2");
+function show(n){v1.style.display=n===1?"":"none";v2.style.display=n===2?"block":"none";t1.classList.toggle("on",n===1);t2.classList.toggle("on",n===2);
+  if(n===2&&v2.contentWindow)v2.contentWindow.dispatchEvent(new Event("resize"));}
+t1.onclick=()=>show(1);t2.onclick=()=>show(2);})();
 </script>
 </body>
 </html>
